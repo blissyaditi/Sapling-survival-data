@@ -1,0 +1,121 @@
+---
+output: html_document
+---
+
+```{r setup}
+library(tidyverse)
+
+# reads in the data, you will need to change the file path to match your file path
+dat <- read.csv("~/../Dropbox/Other_People/aditi/cleaned_data.csv", stringsAsFactors = FALSE) 
+
+## Histogram of dead saplings
+
+longdata <- dat %>% 
+              # gather is the one who takes all the columns that we don't have listed with -In Front of them, and makes them a column that we have
+              # defined as "month"
+              # and then takes the contents of all those columns, and puts it into a column we've defined as "live_dead"
+              gather("month","live_dead", -AREA, -SITE, -largeplot_id, -smallplot_id, -tag, -SPECIES, -height) %>%
+              # mutate creates new columns
+              # here we create two, binary, which is 1 if the sapling is live and 0 if its dead
+              # and group, which is just collapsing area down into two categories, C and F
+              mutate(binary = ifelse(live_dead=="L",1,0),
+                     group=ifelse(AREA=="C1"|AREA=="C2"|AREA=="C3"|AREA=="C4","C","F")) %>%
+              # separate is separate the month column into a column which just contains the word "month" 
+              # and another which has the numeric value
+              # we are sep=5 because month has five characters
+              separate(month, into=c("word","num"),sep=5) %>%
+              # we are turning the num column into a numeric column called month_num
+              mutate(month_num = as.numeric(num)) %>%
+              # filtering out all the dead saplings
+              filter(live_dead=="D")
+
+
+ggplot()+
+      geom_histogram(data=longdata, aes(x=month_num, group=group, fill=group, alpha=0.5), stat="count") + 
+      facet_wrap(~SPECIES)
+
+
+## Histogram of live
+
+longdata <- dat %>% 
+  # gather is the one who takes all the columns that we don't have listed with -In Front of them, and makes them a column that we have
+  # defined as "month"
+  # and then takes the contents of all those columns, and puts it into a column we've defined as "live_dead"
+  gather("month","live_dead", -AREA, -SITE, -largeplot_id, -smallplot_id, -tag, -SPECIES, -height) %>%
+  # mutate creates new columns
+  # here we create two, binary, which is 1 if the sapling is live and 0 if its dead
+  # and group, which is just collapsing area down into two categories, C and F
+  mutate(binary = ifelse(live_dead=="L",1,0),
+         group=ifelse(AREA=="C1"|AREA=="C2"|AREA=="C3"|AREA=="C4","C","F")) %>%
+  # separate is separate the month column into a column which just contains the word "month" 
+  # and another which has the numeric value
+  # we are sep=5 because month has five characters
+  separate(month, into=c("word","num"),sep=5) %>%
+  # we are turning the num column into a numeric column called month_num
+  mutate(month_num = as.numeric(num)) %>%
+  # filtering out all the live saplings
+  filter(live_dead=="L")
+
+
+ggplot()+
+  geom_histogram(data=longdata, aes(x=month_num, group=group, fill=group, alpha=0.5), stat="count") + 
+  facet_wrap(~SPECIES)
+
+
+
+longdata <- dat %>% 
+  # gather is the one who takes all the columns that we don't have listed with -In Front of them, and makes them a column that we have
+  # defined as "month"
+  # and then takes the contents of all those columns, and puts it into a column we've defined as "live_dead"
+  gather("month","live_dead", -AREA, -SITE, -largeplot_id, -smallplot_id, -tag, -SPECIES, -height) %>%
+  # mutate creates new columns
+  # here we create two, binary, which is 1 if the sapling is live and 0 if its dead
+  # and group, which is just collapsing area down into two categories, C and F
+  mutate(binary = ifelse(live_dead=="L",1,0),
+         group=ifelse(AREA=="C1"|AREA=="C2"|AREA=="C3"|AREA=="C4","C","F")) %>%
+  # separate is separate the month column into a column which just contains the word "month" 
+  # and another which has the numeric value
+  # we are sep=5 because month has five characters
+  separate(month, into=c("word","num"),sep=5) %>%
+  # we are turning the num column into a numeric column called month_num
+  mutate(month_num = as.numeric(num)) %>%
+  # filters out just the first month
+  filter(month_num==1) %>%
+  # groups by SPECIES and the group (C and F)
+  group_by(SPECIES, group) %>%
+  # summarizes, so for each unique combination of C and F it will give us the count
+  summarize(count=n())
+
+
+ggplot()+
+    geom_bar(data=longdata, aes(x=SPECIES, y=count, fill=group), stat="identity", position="dodge") 
+  
+
+
+longdata <- dat %>% 
+  # gather is the one who takes all the columns that we don't have listed with -In Front of them, and makes them a column that we have
+  # defined as "month"
+  # and then takes the contents of all those columns, and puts it into a column we've defined as "live_dead"
+  gather("month","live_dead", -AREA, -SITE, -largeplot_id, -smallplot_id, -tag, -SPECIES, -height) %>%
+  # mutate creates new columns
+  # here we create two, binary, which is 1 if the sapling is live and 0 if its dead
+  # and group, which is just collapsing area down into two categories, C and F
+  mutate(binary = ifelse(live_dead=="L",1,0),
+         group=ifelse(AREA=="C1"|AREA=="C2"|AREA=="C3"|AREA=="C4","C","F")) %>%
+  # separate is separate the month column into a column which just contains the word "month" 
+  # and another which has the numeric value
+  # we are sep=5 because month has five characters
+  separate(month, into=c("word","num"),sep=5) %>%
+  # we are turning the num column into a numeric column called month_num
+  mutate(month_num = as.numeric(num)) %>%
+  # filters out just the first month
+  filter(month_num==1) 
+
+
+ggplot()+
+  geom_boxplot(data=longdata, aes(x=SPECIES, y=height, fill=group), position="dodge") 
+
+
+
+
+```
